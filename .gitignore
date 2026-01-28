@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+*.log
+
+# Build outputs
+dist/
+build/
+client/dist/
+client/build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn files
+yarn.lock
+yarn-error.log
+
+# pnpm files
+pnpm-lock.yaml
