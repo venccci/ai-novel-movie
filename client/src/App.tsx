@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   Clapperboard, 
   BookOpen, 
@@ -11,19 +11,15 @@ import {
   Image as ImageIcon,
   Save,
   Play,
-  MoreHorizontal,
   Wand2,
   CheckCircle2,
-  LayoutTemplate,
   Loader2,
   AlertCircle,
   Plus,
   Trash2,
   Lock,
   ArrowRight,
-  Edit3,
-  RefreshCw,
-  X
+  RefreshCw
 } from 'lucide-react';
 
 // --- API Configuration ---
@@ -458,9 +454,9 @@ const Step3Characters = ({
   scriptData, 
   projectData, 
   onNext 
-}: { 
+ }: { 
   characters: Character[], 
-  setCharacters: (c: Character[]) => void, 
+  setCharacters: (c: Character[] | ((prev: Character[]) => Character[])) => void, 
   scriptData: ScriptScene[], 
   projectData: ProjectData, 
   onNext: () => void
@@ -506,12 +502,12 @@ const Step3Characters = ({
   const generateImage = (id: number) => {
     setCharacters(characters.map(c => c.id === id ? { ...c, status: 'generating' } : c));
     setTimeout(() => {
-      setCharacters(prev => prev.map(c => 
+       setCharacters((prev: Character[]) => prev.map((c: Character) => 
         c.id === id ? { 
           ...c, 
           status: 'ready', 
           img: `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.name}&backgroundColor=b6e3f4` 
-        } : c
+        } as Character : c
       ));
     }, 2000);
   };
@@ -607,11 +603,11 @@ const Step4Storyboard = ({
   shots, 
   setShots, 
   scriptData, 
-  characters, 
+  characters: _characters, 
   projectData 
-}: { 
+ }: { 
   shots: Shot[], 
-  setShots: (s: Shot[]) => void, 
+  setShots: (s: Shot[] | ((prev: Shot[]) => Shot[])) => void, 
   scriptData: ScriptScene[], 
   characters: Character[], 
   projectData: ProjectData 
@@ -621,10 +617,10 @@ const Step4Storyboard = ({
   const generateStoryboard = async () => {
     setIsGenerating(true);
     try {
-      const scriptContext = JSON.stringify(scriptData);
-      const charContext = characters.map(c => `${c.name}: ${c.traits}`).join('; ');
-      const systemPrompt = `Create shot list. Style: ${projectData.style}. Custom: ${projectData.customPrompt}.
-      Return JSON: { "shots": [{ "id", "description", "shotType", "cameraMove", "audio", "tags" }] }`;
+       const scriptContext = JSON.stringify(scriptData);
+       // const charContext = characters.map(c => `${c.name}: ${c.traits}`).join('; '); // 预留角色上下文
+       const systemPrompt = `Create shot list. Style: ${projectData.style}. Custom: ${projectData.customPrompt}.
+       Return JSON: { "shots": [{ "id", "description", "shotType", "cameraMove", "audio", "tags" }] }`;
 
       const data = await callDeepSeek(systemPrompt, scriptContext);
       if (data.shots && Array.isArray(data.shots)) {
@@ -637,7 +633,7 @@ const Step4Storyboard = ({
   const generateShotImage = (id: number) => {
     setShots(shots.map(s => s.id === id ? { ...s, imgStatus: 'generating' } : s));
     setTimeout(() => {
-      setShots(prev => prev.map(s => s.id === id ? { ...s, imgStatus: 'done' } : s));
+       setShots((prev: Shot[]) => prev.map((s: Shot) => s.id === id ? { ...s, imgStatus: 'done' } as Shot : s));
     }, 2500);
   };
 
@@ -805,7 +801,7 @@ const Sidebar = ({
   );
 };
 
-const TopBar = ({ currentStep, projectTitle }: { currentStep: string, projectTitle: string }) => {
+const TopBar = ({ currentStep: _currentStep, projectTitle }: { currentStep: string, projectTitle: string }) => {
   return (
     <div className="h-16 border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-10">
       <div className="flex items-center gap-4">
