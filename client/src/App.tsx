@@ -14,11 +14,24 @@ function App() {
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   
   const [projectData, setProjectData] = useState<ProjectData>({
+    // 基础信息与视觉设定默认值
     title: '',
     style: 'anime',
     ratio: '16:9',
-    customPrompt: '',
-    negativePrompt: ''
+    language: 'zh',
+    // 提示词推荐默认值
+    customPrompt: 'masterpiece, best quality, 8k, highly detailed, cinematic lighting, ultra high res',
+    negativePrompt: 'low quality, watermark, text, bad anatomy, extra limbs, blurry, overexposed, underexposed',
+    // 叙事与节奏参数默认值
+    episodeDuration: 3600, // 默认1小时
+    shotDensity: 60, // 默认每10分钟60个镜头
+    narrationRatio: 20, // 默认旁白占比20%
+    dialogueRatio: 40, // 默认对白占比40%
+    pacing: 'medium', // 默认中等节奏
+    // AI 行为约束配置默认值
+    characterConsistency: 80, // 默认角色一致性80%
+    creativeFreedom: 60, // 默认创意自由度60%
+    cameraMovementIntensity: 50 // 默认运镜强度50%
   });
   const [novel, setNovel] = useState('');
   const [scriptData, setScriptData] = useState<ScriptScene[]>([]);
@@ -58,7 +71,26 @@ function App() {
       if (!response.ok) throw new Error('加载项目失败');
       const projectData = await response.json();
       // 更新所有状态
-      setProjectData(projectData.projectData || { title: '', style: 'anime', ratio: '16:9', customPrompt: '', negativePrompt: '' });
+      setProjectData(projectData.projectData || {
+        // 基础信息与视觉设定默认值
+        title: project.title || '',
+        style: 'anime',
+        ratio: '16:9',
+        language: 'zh',
+        // 提示词推荐默认值
+        customPrompt: 'masterpiece, best quality, 8k, highly detailed, cinematic lighting, ultra high res',
+        negativePrompt: 'low quality, watermark, text, bad anatomy, extra limbs, blurry, overexposed, underexposed',
+        // 叙事与节奏参数默认值
+        episodeDuration: 3600,
+        shotDensity: 60,
+        narrationRatio: 20,
+        dialogueRatio: 40,
+        pacing: 'medium',
+        // AI 行为约束配置默认值
+        characterConsistency: 80,
+        creativeFreedom: 60,
+        cameraMovementIntensity: 50
+      });
       setNovel(projectData.novel || '');
       setScriptData(projectData.scriptData || []);
       setCharacters(projectData.characters || []);

@@ -6,8 +6,19 @@ export interface ProjectData {
   title: string;
   style: string;
   ratio: string;
+  language: 'zh' | 'en'; // 项目语言
   customPrompt: string; // 自定义正向提示词
   negativePrompt: string; // 自定义负向提示词
+  // 叙事与节奏参数
+  episodeDuration: number; // 单集时长（秒）
+  shotDensity: number; // 镜头密度（每10分钟镜头数）
+  narrationRatio: number; // 旁白占比（0-100）
+  dialogueRatio: number; // 对白占比（0-100）
+  pacing: 'fast' | 'medium' | 'slow'; // 节奏（快/中/慢）
+  // AI 行为约束配置
+  characterConsistency: number; // 角色一致性要求（0-100）
+  creativeFreedom: number; // 创意自由度（0-100）
+  cameraMovementIntensity: number; // 运镜强度（0-100）
 }
 
 export interface ScriptScene {

@@ -22,6 +22,15 @@ const Step1ProjectStyle: React.FC<Step1ProjectStyleProps> = ({
   ];
 
   const ratios = ['16:9', '9:16', '1:1', '2.35:1'];
+  const languages = [
+    { id: 'zh', name: '中文' },
+    { id: 'en', name: 'English' }
+  ];
+  const pacingOptions = [
+    { id: 'fast', name: '快' },
+    { id: 'medium', name: '中' },
+    { id: 'slow', name: '慢' }
+  ];
 
   return (
     <div className="h-full flex flex-col">
@@ -39,6 +48,20 @@ const Step1ProjectStyle: React.FC<Step1ProjectStyleProps> = ({
             placeholder="例如：星际迷航：最后的边疆"
             className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
           />
+        </InputGroup>
+
+        <InputGroup label="项目语言">
+          <div className="flex gap-3">
+            {languages.map(lang => (
+              <button
+                key={lang.id}
+                onClick={() => updateData('language', lang.id)}
+                className={`px-4 py-2 rounded-lg text-sm border transition-all ${data.language === lang.id ? 'bg-zinc-100 text-black border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800'}`}
+              >
+                {lang.name}
+              </button>
+            ))}
+          </div>
         </InputGroup>
 
         <InputGroup label="视觉风格" desc="决定画面生成的模型与LoRA">
@@ -96,6 +119,109 @@ const Step1ProjectStyle: React.FC<Step1ProjectStyleProps> = ({
             ))}
           </div>
         </InputGroup>
+
+        <div className="bg-zinc-800/50 rounded-xl p-6 border border-zinc-700 mb-6">
+          <h3 className="text-xl font-semibold text-white mb-4">叙事与节奏参数</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <InputGroup label="单集时长（秒）">
+              <input 
+                type="number" 
+                min="30" 
+                max="3600"
+                value={data.episodeDuration}
+                onChange={(e) => updateData('episodeDuration', parseInt(e.target.value))}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              />
+            </InputGroup>
+
+            <InputGroup label="镜头密度（每10分钟镜头数）">
+              <input 
+                type="number" 
+                min="10" 
+                max="200"
+                value={data.shotDensity}
+                onChange={(e) => updateData('shotDensity', parseInt(e.target.value))}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              />
+            </InputGroup>
+
+            <InputGroup label="旁白占比（%）">
+              <input 
+                type="number" 
+                min="0" 
+                max="100"
+                value={data.narrationRatio}
+                onChange={(e) => updateData('narrationRatio', parseInt(e.target.value))}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              />
+            </InputGroup>
+
+            <InputGroup label="对白占比（%）">
+              <input 
+                type="number" 
+                min="0" 
+                max="100"
+                value={data.dialogueRatio}
+                onChange={(e) => updateData('dialogueRatio', parseInt(e.target.value))}
+                className="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              />
+            </InputGroup>
+          </div>
+
+          <InputGroup label="节奏">
+            <div className="flex gap-3">
+              {pacingOptions.map(pacing => (
+                <button
+                  key={pacing.id}
+                  onClick={() => updateData('pacing', pacing.id)}
+                  className={`px-4 py-2 rounded-lg text-sm border transition-all ${data.pacing === pacing.id ? 'bg-zinc-100 text-black border-white' : 'bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800'}`}
+                >
+                  {pacing.name}
+                </button>
+              ))}
+            </div>
+          </InputGroup>
+        </div>
+
+        <div className="bg-zinc-800/50 rounded-xl p-6 border border-zinc-700 mb-6">
+          <h3 className="text-xl font-semibold text-white mb-4">AI 行为约束配置</h3>
+          
+          <div className="space-y-4">
+            <InputGroup label={`角色一致性要求: ${data.characterConsistency}%`} desc="越高越严格保持角色形象一致性">
+              <input 
+                type="range" 
+                min="0" 
+                max="100"
+                value={data.characterConsistency}
+                onChange={(e) => updateData('characterConsistency', parseInt(e.target.value))}
+                className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </InputGroup>
+
+            <InputGroup label={`创意自由度: ${data.creativeFreedom}%`} desc="越高AI越有创作空间">
+              <input 
+                type="range" 
+                min="0" 
+                max="100"
+                value={data.creativeFreedom}
+                onChange={(e) => updateData('creativeFreedom', parseInt(e.target.value))}
+                className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </InputGroup>
+
+            <InputGroup label={`运镜强度: ${data.cameraMovementIntensity}%`} desc="越高镜头运动越剧烈">
+              <input 
+                type="range" 
+                min="0" 
+                max="100"
+                value={data.cameraMovementIntensity}
+                onChange={(e) => updateData('cameraMovementIntensity', parseInt(e.target.value))}
+                className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+            </InputGroup>
+          </div>
+        </div>
       </div>
 
       <div className="pt-6 border-t border-zinc-800 flex justify-end">

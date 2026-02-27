@@ -9,6 +9,7 @@ const shotlistsRouter = require('./routes/shotlists');
 
 const app = express();
 const port = 4000;
+const host = '127.0.0.1';
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -23,6 +24,6 @@ app.use('/api/characters', charactersRouter);
 app.use('/api/shotlists', shotlistsRouter);
 
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server is running on http://${host}:${port}`);
 });

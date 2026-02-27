@@ -21,7 +21,9 @@ export const callDeepSeek = async (systemPrompt: string, userPrompt: string) => 
   });
 
   if (!response.ok) {
-    throw new Error(`API Request failed: ${response.status}`);
+    const errorText = await response.text();
+    console.error('API Error Response:', errorText);
+    throw new Error(`API Request failed: ${response.status} - ${errorText}`);
   }
 
   const data = await response.json();
