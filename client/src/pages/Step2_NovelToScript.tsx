@@ -5,7 +5,9 @@ import {
   Plus, 
   Trash2, 
   ArrowRight,
-  BookOpen
+  BookOpen,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { ScriptScene, ProjectData, AITask } from '../types';
 import { callDeepSeek } from '../utils/api';
@@ -18,6 +20,9 @@ interface Step2ScriptProps {
   setScriptData: (data: ScriptScene[]) => void;
   projectData: ProjectData;
   onNext: () => void;
+  isLocked: boolean;
+  onLock: () => void;
+  onUnlock: () => void;
   addAITask: (task: Omit<AITask, 'id'>) => string;
   updateAITask: (id: string, updates: Partial<AITask>) => void;
 }
@@ -29,6 +34,9 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
   setScriptData, 
   projectData,
   onNext,
+  isLocked,
+  onLock,
+  onUnlock,
   addAITask,
   updateAITask
 }) => {
@@ -128,7 +136,7 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
           variant="accent" 
           icon={Loader2} 
           onClick={analyzeNovel}
-          disabled={isAnalyzing}
+          disabled={isAnalyzing || isLocked}
         >
           {isAnalyzing ? "提取中..." : "一键提取剧本"}
         </Button>
@@ -145,13 +153,14 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
             placeholder="在此粘贴小说章节内容..."
             value={novel}
             onChange={(e) => setNovel(e.target.value)}
+            disabled={isLocked}
           />
         </div>
 
         <div className="flex flex-col gap-2 h-full min-h-0">
           <div className="flex justify-between items-center text-sm text-zinc-400 px-1">
             <span>剧本结构预览 (可编辑)</span>
-            <Button variant="ghost" size="sm" icon={Plus} onClick={addScene}>添加场次</Button>
+            <Button variant="ghost" size="sm" icon={Plus} onClick={addScene} disabled={isLocked}>添加场次</Button>
           </div>
           <div className="flex-1 w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 overflow-y-scroll custom-scrollbar relative">
              
@@ -174,16 +183,22 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
                         value={scene.location}
                         onChange={(e) => updateScene(scene.id, 'location', e.target.value)}
                         placeholder="场景地点"
+                        disabled={isLocked}
                       />
                       <select 
                         className="bg-zinc-900 text-zinc-400 text-xs border border-zinc-800 rounded outline-none p-1"
                         value={scene.time}
                         onChange={(e) => updateScene(scene.id, 'time', e.target.value)}
+                        disabled={isLocked}
                       >
                         <option>DAY</option>
                         <option>NIGHT</option>
                       </select>
-                      <button onClick={() => deleteScene(scene.id)} className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => deleteScene(scene.id)}
+                        disabled={isLocked}
+                        className="text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
                         <Trash2 size={14}/>
                       </button>
                     </div>
@@ -195,6 +210,7 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
                         value={scene.characters}
                         onChange={(e) => updateScene(scene.id, 'characters', e.target.value)}
                         placeholder="出场角色"
+                        disabled={isLocked}
                       />
                     </div>
                     
@@ -204,6 +220,7 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
                       value={scene.description}
                       onChange={(e) => updateScene(scene.id, 'description', e.target.value)}
                       placeholder="剧情描述..."
+                      disabled={isLocked}
                     />
                   </div>
                 ))}
@@ -220,8 +237,23 @@ const Step2Script: React.FC<Step2ScriptProps> = ({
       </div>
       
       {scriptData.length > 0 && (
-        <div className="pt-4 border-t border-zinc-800 flex justify-end">
-           <Button onClick={onNext} icon={ArrowRight}>确认剧本并生成角色</Button>
+        <div className="pt-4 border-t border-zinc-800 flex justify-end gap-3">
+           <Button
+             variant={isLocked ? "secondary" : "outline"}
+             icon={isLocked ? Unlock : Lock}
+             onClick={isLocked ? onUnlock : onLock}
+           >
+             {isLocked ? "解锁剧本" : "锁定剧本"}
+           </Button>
+           <Button
+             onClick={() => {
+               if (!isLocked) onLock();
+               onNext();
+             }}
+             icon={ArrowRight}
+           >
+             {isLocked ? "进入角色设计" : "锁定并进入角色设计"}
+           </Button>
         </div>
       )}
     </div>

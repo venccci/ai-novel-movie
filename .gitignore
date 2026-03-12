@@ -30,6 +30,7 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+test-artifacts/
 
 # Coverage directory used by tools like istanbul
 coverage/

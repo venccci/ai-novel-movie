@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StepType, ProjectData, ScriptScene, Character, Shot, StepsStatus, Project, AITask } from './types';
+import { StepType, ProjectData, ScriptScene, Character, Shot, StepsStatus, Project, AITask, WorkflowLocks } from './types';
 import Sidebar from './components/PipelineSidebar';
 import TopBar from './components/TopNav';
 import Step1ProjectStyle from './pages/Step1_ProjectStyle';
@@ -7,6 +7,12 @@ import Step2Script from './pages/Step2_NovelToScript';
 import Step3Characters from './pages/Step3_CharacterDesign';
 import Step4Storyboard from './pages/Step4_DirectorScript';
 import Dashboard from './pages/Dashboard';
+
+const defaultLocks: WorkflowLocks = {
+  script: false,
+  characters: false,
+  storyboard: false,
+};
 
 function App() {
   const [view, setView] = useState<'dashboard' | 'editor'>('dashboard');
@@ -37,6 +43,7 @@ function App() {
   const [scriptData, setScriptData] = useState<ScriptScene[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [shots, setShots] = useState<Shot[]>([]);
+  const [locks, setLocks] = useState<WorkflowLocks>(defaultLocks);
   
   // AI 任务管理
   const addAITask = (task: Omit<AITask, 'id'>) => {
@@ -55,8 +62,32 @@ function App() {
   const stepsStatus: StepsStatus = {
     project: true,
     script: !!projectData.title && !!projectData.style && !!projectData.ratio,
-    characters: scriptData.length > 0,
-    storyboard: characters.length > 0,
+    characters: scriptData.length > 0 && locks.script,
+    storyboard: characters.length > 0 && locks.characters,
+  };
+
+  const lockScript = () => {
+    setLocks(prev => ({ ...prev, script: true }));
+  };
+
+  const unlockScript = () => {
+    setLocks(prev => ({ ...prev, script: false, characters: false, storyboard: false }));
+  };
+
+  const lockCharacters = () => {
+    setLocks(prev => ({ ...prev, script: true, characters: true }));
+  };
+
+  const unlockCharacters = () => {
+    setLocks(prev => ({ ...prev, characters: false, storyboard: false }));
+  };
+
+  const lockStoryboard = () => {
+    setLocks(prev => ({ ...prev, script: true, characters: true, storyboard: true }));
+  };
+
+  const unlockStoryboard = () => {
+    setLocks(prev => ({ ...prev, storyboard: false }));
   };
 
   const updateProjectData = (key: string, val: any) => {
@@ -95,17 +126,20 @@ function App() {
       setScriptData(projectData.scriptData || []);
       setCharacters(projectData.characters || []);
       setShots(projectData.shots || []);
+      setLocks(projectData.locks || defaultLocks);
     } catch (error) {
       console.error('加载项目错误:', error);
       // 如果加载失败，至少设置标题
       setProjectData(prev => ({ ...prev, title: project.title }));
+      setLocks(defaultLocks);
     }
     setView('editor');
     setStep('project');
   };
 
   const saveProject = async () => {
-    if (!currentProjectId) {
+    let projectId = currentProjectId;
+    if (!projectId) {
       // 如果没有当前项目ID，先创建项目
       const response = await fetch('http://localhost:4000/api/projects', {
         method: 'POST',
@@ -114,8 +148,8 @@ function App() {
       });
       if (!response.ok) throw new Error('创建项目失败');
       const newProject = await response.json();
-      setCurrentProjectId(newProject.id);
-      // 继续保存数据
+      projectId = newProject.id;
+      setCurrentProjectId(projectId);
     }
     // 保存项目数据到后端
     const projectState = {
@@ -125,9 +159,10 @@ function App() {
       scriptData,
       characters,
       shots,
+      locks,
     };
     try {
-      const response = await fetch(`http://localhost:4000/api/projects/${currentProjectId}`, {
+      const response = await fetch(`http://localhost:4000/api/projects/${projectId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectState),
@@ -169,6 +204,9 @@ function App() {
                   setScriptData={setScriptData}
                   projectData={projectData}
                   onNext={() => setStep('characters')}
+                  isLocked={locks.script}
+                  onLock={lockScript}
+                  onUnlock={unlockScript}
                   addAITask={addAITask}
                   updateAITask={updateAITask}
                />
@@ -181,6 +219,9 @@ function App() {
                   scriptData={scriptData}
                   projectData={projectData}
                   onNext={() => setStep('storyboard')}
+                  isLocked={locks.characters}
+                  onLock={lockCharacters}
+                  onUnlock={unlockCharacters}
                   addAITask={addAITask}
                   updateAITask={updateAITask}
                />
@@ -193,6 +234,9 @@ function App() {
                   scriptData={scriptData}
                   characters={characters}
                   projectData={projectData}
+                  isLocked={locks.storyboard}
+                  onLock={lockStoryboard}
+                  onUnlock={unlockStoryboard}
                   addAITask={addAITask}
                   updateAITask={updateAITask}
                />

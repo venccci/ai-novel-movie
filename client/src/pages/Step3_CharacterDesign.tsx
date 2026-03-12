@@ -5,7 +5,9 @@ import {
   Plus, 
   Trash2, 
   ArrowRight,
-  Users 
+  Users,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { Character, ScriptScene, ProjectData, AITask } from '../types';
 import { callDeepSeek } from '../utils/api';
@@ -17,6 +19,9 @@ interface Step3CharactersProps {
   scriptData: ScriptScene[];
   projectData: ProjectData;
   onNext: () => void;
+  isLocked: boolean;
+  onLock: () => void;
+  onUnlock: () => void;
   addAITask: (task: Omit<AITask, 'id'>) => string;
   updateAITask: (id: string, updates: Partial<AITask>) => void;
 }
@@ -27,6 +32,9 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
   scriptData, 
   projectData, 
   onNext,
+  isLocked,
+  onLock,
+  onUnlock,
   addAITask,
   updateAITask
 }) => {
@@ -112,12 +120,12 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
           <p className="text-zinc-400">管理角色资产，支持 AI 提取与手动微调。</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="secondary" icon={Plus} onClick={addCharacter}>手动添加</Button>
+          <Button variant="secondary" icon={Plus} onClick={addCharacter} disabled={isLocked}>手动添加</Button>
           <Button 
             variant="accent" 
             icon={Sparkles} 
             onClick={generateCharacters}
-            disabled={isGenerating}
+            disabled={isGenerating || isLocked}
           >
             {isGenerating ? "提取中..." : "从剧本提取角色"}
           </Button>
@@ -135,8 +143,13 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
                   value={char.name}
                   onChange={(e) => updateCharacter(char.id, 'name', e.target.value)}
                   placeholder="角色名称"
+                  disabled={isLocked}
                 />
-                <button onClick={() => setCharacters(characters.filter(c => c.id !== char.id))} className="text-zinc-600 hover:text-red-400 p-1 ml-2 flex-shrink-0">
+                <button
+                  onClick={() => setCharacters(characters.filter(c => c.id !== char.id))}
+                  disabled={isLocked}
+                  className="text-zinc-600 hover:text-red-400 p-1 ml-2 flex-shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
                   <Trash2 size={16}/>
                 </button>
               </div>
@@ -155,7 +168,8 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
                     <Users size={24} className="text-zinc-700" />
                     <button 
                       onClick={() => generateImage(char.id)}
-                      className="text-xs text-blue-400 hover:text-blue-300 underline"
+                      disabled={isLocked}
+                      className="text-xs text-blue-400 hover:text-blue-300 underline disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       生成立绘
                     </button>
@@ -170,6 +184,7 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
                   value={char.role}
                   onChange={(e) => updateCharacter(char.id, 'role', e.target.value)}
                   placeholder="角色定位"
+                  disabled={isLocked}
                 />
                 
                 <div>
@@ -179,6 +194,7 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
                     value={char.appearance}
                     onChange={(e) => updateCharacter(char.id, 'appearance', e.target.value)}
                     placeholder="请详细描述角色的外貌特征..."
+                    disabled={isLocked}
                   />
                 </div>
                 <div>
@@ -188,6 +204,7 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
                     value={char.background}
                     onChange={(e) => updateCharacter(char.id, 'background', e.target.value)}
                     placeholder="请详细描述角色的背景故事..."
+                    disabled={isLocked}
                   />
                 </div>
               </div>
@@ -197,8 +214,23 @@ const Step3Characters: React.FC<Step3CharactersProps> = ({
       </div>
 
       {characters.length > 0 && (
-        <div className="pt-4 border-t border-zinc-800 flex justify-end">
-           <Button onClick={onNext} icon={ArrowRight}>确认角色并生成分镜</Button>
+        <div className="pt-4 border-t border-zinc-800 flex justify-end gap-3">
+           <Button
+             variant={isLocked ? "secondary" : "outline"}
+             icon={isLocked ? Unlock : Lock}
+             onClick={isLocked ? onUnlock : onLock}
+           >
+             {isLocked ? "解锁角色" : "锁定角色"}
+           </Button>
+           <Button
+             onClick={() => {
+               if (!isLocked) onLock();
+               onNext();
+             }}
+             icon={ArrowRight}
+           >
+             {isLocked ? "进入分镜脚本" : "锁定并进入分镜脚本"}
+           </Button>
         </div>
       )}
     </div>

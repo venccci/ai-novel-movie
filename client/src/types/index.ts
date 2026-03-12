@@ -47,6 +47,8 @@ export interface Shot {
   audio: string;
   tags: string[];
   prompt: string;
+  durationSec?: number;
+  locked?: boolean;
   imgStatus?: 'empty' | 'generating' | 'done'; // 图片生成状态
 }
 
@@ -77,6 +79,12 @@ export interface StepsStatus {
   storyboard: boolean;
 }
 
+export interface WorkflowLocks {
+  script: boolean;
+  characters: boolean;
+  storyboard: boolean;
+}
+
  // 项目工程类型
  export interface Project {
    id: string;
@@ -88,6 +96,7 @@ export interface StepsStatus {
    scriptData?: ScriptScene[];
    characters?: Character[];
    shots?: Shot[];
+   locks?: WorkflowLocks;
  }
 
  // UI 组件 Props 类型

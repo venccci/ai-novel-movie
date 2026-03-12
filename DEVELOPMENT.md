@@ -28,11 +28,14 @@ npm install
 
 ### 2. Configure DeepSeek API Key
 
-In `client/src/App.tsx`, locate the `API_KEY` constant and replace it with your own DeepSeek API key:
+Create or edit `client/.env` and set your own DeepSeek API key:
 
-```typescript
-const API_KEY = "your_deepseek_api_key_here";
+```bash
+VITE_DEEPSEEK_API_KEY=your_real_deepseek_api_key
 ```
+
+The frontend reads this value in `client/src/utils/api.ts`.  
+After editing `.env`, restart `npm run dev`.
 
 ### 3. Backend Setup (Optional)
 
@@ -69,7 +72,7 @@ If you want to use backend features (project persistence, etc.):
     npm start
     ```
 
-    The backend server will start on `http://localhost:3000`. It uses `nodemon` and will automatically restart if you make any changes to the server files.
+    The backend server will start on `http://localhost:4000`. It uses `nodemon` and will automatically restart if you make any changes to the server files.
 
 2.  **Start the frontend application** (as above).
 
